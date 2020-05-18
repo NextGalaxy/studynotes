@@ -37,3 +37,16 @@
       * 描述符协议基于三个特殊方法：\_\_get\_\_(self,obj,owner), \_\_set\_\_(self, instance, value),\_\_delete\_\_
       * 实现了\_\_get\_\_(self,obj,owner), \_\_set\_\_(self, instance, value)的描述符被称为数据描述符；只实现了\_\_get\_\_(self,obj,owner)称为非数据描述符；
       * 常用场景：数据描述符常用来校验被委托类成员数据的合法性、常用缓存被委托类的数据，多个实例共享的缓存数据等等。
+
+### 元编程
+#### 混入类
+  + 混入类是一种不应该被初始化的类，而是用来向其他现有类提供某种API或者功能。
+  + 混入类总是使用多种继承类添加。
+### 元类
+  + 所有类定义的基类都是type类；
+  + 可以将某个类的元类替换为我们自定义的类型，新的元类仍然是type类的子类；
+  + 用class创建的每个类都隐性的使用type作为其元类，可以通过向class语句提供metaclass关键字参数来改变这一默认行为。
+  ``` python
+  class ClassWithAMetaClass(metaclass=type):
+      pass
+  ```
