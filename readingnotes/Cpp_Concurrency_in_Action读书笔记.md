@@ -25,11 +25,19 @@
             memory_order_seq_cst
         } memory_order;
         ```
-    * 将上述内存排序分成3类
-        1. Store操作：memory_order_relaxed, memory_order_release, memory_order_seq_cst;
-        2. Load操作： memory_order_relaxed, memory_order_consume, memory_order_acquire, memory_order_seq_cst;
+    * 将上述内存排序按照使用方式分成3类
+        1. Store(写)操作：memory_order_relaxed, memory_order_release, memory_order_seq_cst;
+        2. Load(读)操作： memory_order_relaxed, memory_order_consume, memory_order_acquire, memory_order_seq_cst;
         3. read-modify-write(读-改-写)操作： memory_order_relaxed, memory_order_consume,memory_order_acquire,memory_order_release,memory_order_acq_rel,memory_order_seq_cst；
     * 所有操作的默认顺序都是memory_order_seq_cst;
+    * 按照内存模型种类分成3大类
+        1. 排序一致序列：memory_order_seq_cst;
+        2. 获取-释放序列：memory_order_consume, memory_order_acquire, memory_order_release, memory_order_acq_rel;
+        3. 自由序列：memory_order_relaxed
+    * 序列一致是最简单直观的序列，但是它也是最昂贵的内存序列，因为它需要对所有线程进行全局同步。在一个多处理器系统上，需要在处理期间进行大量且费时的信息交换。
+    * 我强烈建议避免使用自有序列的原子操作，除非它们是硬性要求
+* #### 总结
+    C++内存序列和原子操作这一块太难了，暂时没有看太懂，后期结合实际使用再来重新探索
 
 ### 基于锁的并发数据结构的设计
 原则：减小保护区域，减少序列化操作，提高并发访问能力。
@@ -39,3 +47,24 @@
 * 提供完整操作函数，而非操作步骤函数
 * 降低死锁概率
 * 减小保护区域，减小序列化操作范围，最大化并发访问效果
+
+### 并发代码的设计
+* 把数据任务进行划分，平均分配到n个线程，这种情况是适用于每个线程对数据做同样的处理
+* 通过任务类型划分工作：这种情况适用于每个线程对数据做不同的处理，即每个线程只关注自己的事情
+    1. 分离关注
+        * 多线程下需要分离关注的情况列举：对错误担忧的分离，主要表现为线程间共享这很多数据，或者不同的线程需要相互等待，这两种情况下线程之间都会有密切的交互；
+        * 思考或解决：为什么线程间需要这么多交互，如果所有的交互都有关于同样的问题，就应该使用单线程来解决，并将引用同一原因的线程提取出来；或者当有两个线程频繁的进行交流，且没有其他线程参与，思考是否可以将这两个线程合并为一个线程
+    2. 划分任务序列
+        * 可以构建流水线（pipline）系统进行构建
+
+### 影响并发代码性能的因素
+1. 处理器个数是影响多线程应用的首要因素
+2. 数据争用与乒乓缓存
+    * 在多核处理器上，当有线程对数据进行修改时候，这个修改可能需要更新到其他核心的缓存中去，需要耗费一定的时间，这个时间的长短取决于处理器的物理结构，不过根据CPU指令，这个操作特别慢，相当于执行了成百上千个独立指令
+    * 乒乓缓存：数据在每个核心的每个缓存中传递若干次，严重拖慢应用的性能；
+    * 建议：减少两个线程对同一个内存位置的竞争；
+3. 伪共享
+    * 缓存行是共享的，即使没有数据存在，因此使用伪共享来称呼这种方式；
+    * 处理器缓存通常不会用来处理单个存储位置，但其会用来处理称为缓存行（cache lines）的内存块；
+
+
