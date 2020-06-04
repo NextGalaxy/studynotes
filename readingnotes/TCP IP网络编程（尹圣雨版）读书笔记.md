@@ -1,3 +1,55 @@
+### 套接字
+#### 服务端处理
+ * 生成socket套接字方式
+    ```
+    #include <sys/socket.h>
+    // 成功时返回文件描述符，失败返回-1
+    int socket(int domain, int type, int protocol);
+    ```
+* 绑定地址信息 bind
+    ```
+    #include <sys/socket.h>
+    // 成功时返回0，失败-1
+    int bind(int sockfd, struct sockaddr* addr, socklen_t addrlen);
+    ```
+* 监听 listen
+    ```
+    #include <sys/socket.h>
+    // 成功时返回0，失败-1
+    int listen(int sockfd, int backlog);
+    ```
+* 接收连接请求 accept
+    ```
+    #include <sys/socket.h>
+    // 这里的addr和addrlen是输出参数，当accept成功并返回文件描述符时，
+    // 客户端地址信息会存储在addr中
+    int accept(int sockfd, struct sockaddr* addr, socklen_t* addrlen);
+    ```
+
+* #### 简言之，网络编程中服务端接受连接请求的套接字创建过程如下
+    1. 调用socket函数创建套接字
+    2. 调用bind函数分配监听的ip地址和端口
+    3. 调用listen函数使程序进入监听状态
+    4. 调用accept函数受理连接请求
+
+#### 客户端处理，客户端连接请求相对于服务端接受连接请求要简单一些了
+* 生成socket套接字方式
+    ```
+    #include <sys/socket.h>
+    // 成功时返回文件描述符，失败返回-1
+    int socket(int domain, int type, int protocol);
+    ```
+* 连接服务器 connect
+    ```
+    #include <sys/socket.h>
+    // 成功时返回0，失败返回-1
+    int connect(int sockfd, struct sockaddr* addr, socklen_t addrlen);
+    ```
+* #### 简言之，客户端发起连接就只有两个步骤
+    1. 调用socket函数创建套接字
+    2. 调用connect函数连接服务端
+
+
 ### IO复用
 #### 复用含义
 * 在一个通信频道中传递多个数据的技术
